@@ -1,0 +1,8 @@
+{
+  "rail_fire": {
+    "subtitle": "sound.qlcraft.rail_fire",
+    "sounds": [
+      "qlcraft:rail_fire"
+    ]
+  }
+}
