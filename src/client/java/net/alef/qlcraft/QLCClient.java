@@ -13,9 +13,9 @@ public class QLCClient implements ClientModInitializer {
         ClientPreAttackCallback.EVENT.register(((client, player, clickCount) -> {
             if (player.getMainHandStack().getItem() instanceof RailgunItem && clickCount == 1) {
                 if (player.getItemCooldownManager().isCoolingDown(player.getMainHandStack())) {
-                    return false; // prevent multiple firings at the same time
+                    return false;
                 }
-                player.getItemCooldownManager().set(player.getMainHandStack(), 20); // 1 second cooldown
+                player.getItemCooldownManager().set(player.getMainHandStack(), 20); // 1 second cooldown at 20 ticks per second
                 FireRailgunPayload payload = new FireRailgunPayload();
                 ClientPlayNetworking.send(payload);
                 return true;

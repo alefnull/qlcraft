@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 public class QLCraft implements ModInitializer {
 	public static final String MOD_ID = "qlcraft";
-    public static final String MOD_VERSION = "0.0.1";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     @Override
@@ -31,9 +30,9 @@ public class QLCraft implements ModInitializer {
         ServerPlayNetworking.registerGlobalReceiver(FireRailgunPayload.ID, (payload, context) -> {
             if (context.player().getMainHandStack().getItem() instanceof RailgunItem railgun) {
                 if (context.player().getItemCooldownManager().isCoolingDown(context.player().getMainHandStack())) {
-                    return; // prevent multiple firings at the same time
+                    return;
                 }
-                railgun.fire(context.player());
+                railgun.firePrimary(context.player());
                 context.player().incrementStat(Stats.USED.getOrCreateStat(railgun));
             }
         });
