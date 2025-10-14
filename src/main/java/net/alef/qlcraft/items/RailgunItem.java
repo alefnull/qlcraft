@@ -50,6 +50,10 @@ public class RailgunItem extends Item {
                 BlockHitResult blockHit = raycastBlock(player, RANGE, 0.0F);
                 if (blockHit.getType() != BlockHitResult.Type.MISS) {
                     handleBlockHit(world, player, blockHit);
+                } else {
+                    Vec3d start = player.getCameraPosVec(0.0F);
+                    Vec3d end = start.add(player.getRotationVec(0.0F).normalize().multiply(RANGE));
+                    spawnParticleLine((ServerWorld) world, start, end);
                 }
             }
         }
