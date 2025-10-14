@@ -26,6 +26,7 @@ import java.util.List;
 public class RailgunItem extends Item {
     private static final float POWER = 100.0F;
     private static final double RANGE = 100.0;
+    private static final double SECONDARY_RANGE = 2.0;
     private static final double PARTICLE_STEP = 0.5;
     private static final double ENTITY_RAYCAST_STEP = 0.25;
 
@@ -34,7 +35,7 @@ public class RailgunItem extends Item {
     }
 
     /**
-     * Fires the railgun: damages entities or breaks blocks, spawns particles, and plays sound.
+     * Fire railgun's primary: damages entities or breaks blocks, spawns particles, and plays sound.
      */
     public void fire(PlayerEntity player) {
         if (player.getItemCooldownManager().isCoolingDown(player.getMainHandStack())) {
@@ -47,30 +48,28 @@ public class RailgunItem extends Item {
             if (entityHit != null) {
                 handleEntityHit(world, player, entityHit);
             } else {
-                BlockHitResult blockHit = raycastBlock(player, RANGE, 0.0F);
-                if (blockHit.getType() != BlockHitResult.Type.MISS) {
-                    handleBlockHit(world, player, blockHit);
-                } else {
+//                BlockHitResult blockHit = raycastBlock(player, RANGE, 0.0F);
+//                if (blockHit.getType() != BlockHitResult.Type.MISS) {
+//                    handleBlockHit(world, player, blockHit);
+//                } else {
                     Vec3d start = player.getCameraPosVec(0.0F);
                     Vec3d end = start.add(player.getRotationVec(0.0F).normalize().multiply(RANGE));
                     spawnParticleLine((ServerWorld) world, start, end);
-                }
+//                }
             }
         }
     }
 
+    /**
+     * Fire railgun's secondary: "rail jump" by spawning a WindChargeEntity towards target block within SECONDARY_RANGE.
+     */
     @Override
     public ActionResult use(World world, PlayerEntity player, Hand hand) {
         if (!world.isClient()) {
             if (player.getItemCooldownManager().isCoolingDown(player.getMainHandStack())) {
                 return ActionResult.PASS;
             }
-            EntityHitResult entityHit = raycastLivingEntity(player, RANGE, 0.0F);
-            if (entityHit != null) {
-                spawnWindCharge(world, player, entityHit.getPos());
-                return ActionResult.SUCCESS;
-            }
-            BlockHitResult blockHit = raycastBlock(player, RANGE, 0.0F);
+            BlockHitResult blockHit = raycastBlock(player, SECONDARY_RANGE, 0.0F);
             if (blockHit.getType() != BlockHitResult.Type.MISS) {
                 spawnWindCharge(world, player, blockHit.getPos());
                 return ActionResult.SUCCESS;
@@ -80,7 +79,7 @@ public class RailgunItem extends Item {
     }
 
     /**
-     * Raycasts for blocks in a straight line from the camera.
+     * Raycast for blocks in a straight line from the camera.
      */
     public static BlockHitResult raycastBlock(Entity camera, double range, float tickDelta) {
         Vec3d direction = camera.getRotationVec(tickDelta).normalize();
@@ -90,7 +89,7 @@ public class RailgunItem extends Item {
     }
 
     /**
-     * Raycasts for the first LivingEntity in a straight line, ignoring blocks.
+     * Raycast for the first LivingEntity in a straight line, ignoring blocks.
      */
     public static EntityHitResult raycastLivingEntity(Entity camera, double range, float tickDelta) {
         Vec3d start = camera.getCameraPosVec(tickDelta);
@@ -109,7 +108,7 @@ public class RailgunItem extends Item {
     }
 
     /**
-     * Spawns a wind charge projectile towards the target position.
+     * Spawn a wind charge projectile towards the target position.
      */
     private void spawnWindCharge(World world, PlayerEntity player, Vec3d targetPos) {
         Vec3d direction = targetPos.subtract(player.getCameraPosVec(0.0F)).normalize();
@@ -134,14 +133,14 @@ public class RailgunItem extends Item {
     /**
      * Handles hitting a block: breaks block and spawns particles.
      */
-    private void handleBlockHit(World world, PlayerEntity player, BlockHitResult blockHit) {
-        Vec3d start = player.getCameraPosVec(0.0F);
-        Vec3d end = blockHit.getPos();
-        spawnParticleLine((ServerWorld) world, start, end);
-        if (world.getBlockState(blockHit.getBlockPos()).getHardness(world, blockHit.getBlockPos()) >= 0) {
-            world.breakBlock(blockHit.getBlockPos(), true, player);
-        }
-    }
+//    private void handleBlockHit(World world, PlayerEntity player, BlockHitResult blockHit) {
+//        Vec3d start = player.getCameraPosVec(0.0F);
+//        Vec3d end = blockHit.getPos();
+//        spawnParticleLine((ServerWorld) world, start, end);
+//        if (world.getBlockState(blockHit.getBlockPos()).getHardness(world, blockHit.getBlockPos()) >= 0) {
+//            world.breakBlock(blockHit.getBlockPos(), true, player);
+//        }
+//    }
 
     /**
      * Spawns a line of particles between two points.
