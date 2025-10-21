@@ -2,6 +2,7 @@ package net.alef.qlcraft.items;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.WindChargeEntity;
 import net.minecraft.particle.DustColorTransitionParticleEffect;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.server.world.ServerWorld;
@@ -20,16 +21,17 @@ public class RailgunItem extends BaseWeaponItem {
 
     public RailgunItem(Settings settings) {
         super(settings);
+        INSTAGIB = true;
     }
 
     @Override
-    protected void onPrimaryFire(PlayerEntity player) {
+    protected void onPrimaryFire(PlayerEntity player, boolean instagib) {
         World world = player.getEntityWorld();
         ParticleEffect pfx = new DustColorTransitionParticleEffect(Colors.GREEN, Colors.YELLOW, 1.0f);
-        playFireSound(world, player);
+        playFireSound(world, player, "qlcraft:rail_fire");
         EntityHitResult entityHit = raycastLivingEntity(player, RANGE, 0.0F);
         if (entityHit != null) {
-            handleEntityHit(world, player, entityHit);
+            handleEntityHit(world, player, entityHit, instagib);
         }
         BlockHitResult blockHit = raycastBlock(player, RANGE, 0.0F);
         if (blockHit.getType() != BlockHitResult.Type.MISS) {
@@ -41,7 +43,7 @@ public class RailgunItem extends BaseWeaponItem {
     }
 
     @Override
-    protected void onSecondaryFire(World world, PlayerEntity player, Hand hand) {
+    protected void onSecondaryFire(World world, PlayerEntity player, Hand hand, boolean instagib) {
         BlockHitResult blockHit = raycastBlock(player, SECONDARY_RANGE, 0.0F);
         if (blockHit.getType() != BlockHitResult.Type.MISS) {
             spawnWindCharge(world, player, blockHit.getPos());
@@ -49,10 +51,14 @@ public class RailgunItem extends BaseWeaponItem {
     }
 
     // handles hitting an entity: deals damage
-    public void handleEntityHit(World world, PlayerEntity player, EntityHitResult entityHit) {
+    public void handleEntityHit(World world, PlayerEntity player, EntityHitResult entityHit, boolean instagib) {
         Entity target = entityHit.getEntity();
         if (target != null) {
-            target.damage(((ServerWorld) world), player.getDamageSources().genericKill(), POWER);
+            if (instagib) {
+                target.damage(((ServerWorld) world), player.getDamageSources().genericKill(), Float.MAX_VALUE);
+            } else {
+                target.damage(((ServerWorld) world), player.getDamageSources().genericKill(), POWER);
+            }
             player.incrementStat(Stats.USED.getOrCreateStat(this));
         }
     }
@@ -62,6 +68,16 @@ public class RailgunItem extends BaseWeaponItem {
         if (world.getBlockState(blockHit.getBlockPos()).getHardness(world, blockHit.getBlockPos()) >= 0) {
             world.breakBlock(blockHit.getBlockPos(), true, player);
         }
+    }
+
+    // spawns a WindChargeEntity towards the target position
+    // (used for railgun secondary fire)
+    public void spawnWindCharge(World world, PlayerEntity player, Vec3d targetPos) {
+        Vec3d direction = targetPos.subtract(player.getCameraPosVec(0.0F)).normalize();
+        WindChargeEntity windCharge = new WindChargeEntity(player, world, 0, 0, 0);
+        windCharge.setVelocity(direction.x * 2.0, direction.y * 2.0, direction.z * 2.0);
+        windCharge.updatePosition(player.getX(), player.getY() + player.getStandingEyeHeight(), player.getZ());
+        world.spawnEntity(windCharge);
     }
 
 }

@@ -15,7 +15,7 @@ public class QLCClient implements ClientModInitializer {
                 if (player.getItemCooldownManager().isCoolingDown(player.getMainHandStack())) {
                     return false;
                 }
-                player.getItemCooldownManager().set(player.getMainHandStack(), 20); // 1 second cooldown at 20 ticks per second
+                player.getItemCooldownManager().set(player.getMainHandStack(), 30); // 1 second cooldown at 20 ticks per second
                 FireRailgunPayload payload = new FireRailgunPayload();
                 ClientPlayNetworking.send(payload);
                 return true;

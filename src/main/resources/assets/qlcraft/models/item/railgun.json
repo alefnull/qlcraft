@@ -5,6 +5,7 @@
 		"0": "qlcraft:item/railgun",
 		"particle": "qlcraft:item/railgun"
 	},
+  "gui-light": "side",
 	"elements": [
 		{
 			"from": [6, 9, -7],

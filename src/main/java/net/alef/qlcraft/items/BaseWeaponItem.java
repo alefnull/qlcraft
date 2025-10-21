@@ -4,7 +4,6 @@ package net.alef.qlcraft.items;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.WindChargeEntity;
 import net.minecraft.item.Item;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.server.world.ServerWorld;
@@ -25,6 +24,7 @@ import java.util.List;
 public abstract class BaseWeaponItem extends Item {
     private static final double PARTICLE_STEP = 0.5;
     private static final double ENTITY_RAYCAST_STEP = 0.25;
+    public boolean INSTAGIB = false; // set to true to enable instagib mode
 
     public BaseWeaponItem(Settings settings) {
         super(settings);
@@ -35,7 +35,7 @@ public abstract class BaseWeaponItem extends Item {
     public void firePrimary(PlayerEntity player) {
         if (!player.getEntityWorld().isClient()) {
             if (!player.getItemCooldownManager().isCoolingDown(player.getMainHandStack())) {
-                onPrimaryFire(player);
+                onPrimaryFire(player, INSTAGIB);
             }
         }
     }
@@ -45,7 +45,7 @@ public abstract class BaseWeaponItem extends Item {
     public ActionResult use(World world, PlayerEntity player, Hand hand) {
         if (!world.isClient()) {
             if (!player.getItemCooldownManager().isCoolingDown(player.getMainHandStack())) {
-                onSecondaryFire(world, player, hand);
+                onSecondaryFire(world, player, hand, INSTAGIB);
                 return ActionResult.SUCCESS;
             }
         }
@@ -53,8 +53,8 @@ public abstract class BaseWeaponItem extends Item {
     }
 
     // abstract methods for subclasses to implement
-    protected abstract void onPrimaryFire(PlayerEntity player);
-    protected abstract void onSecondaryFire(World world, PlayerEntity player, Hand hand);
+    protected abstract void onPrimaryFire(PlayerEntity player, boolean instagib);
+    protected abstract void onSecondaryFire(World world, PlayerEntity player, Hand hand, boolean instagib);
 
     // raycast for blocks
     public static BlockHitResult raycastBlock(Entity camera, double range, float tickDelta) {
@@ -81,16 +81,6 @@ public abstract class BaseWeaponItem extends Item {
         return null;
     }
 
-    // spawns a WindChargeEntity towards the target position
-    // (used for railgun secondary fire)
-    public void spawnWindCharge(World world, PlayerEntity player, Vec3d targetPos) {
-        Vec3d direction = targetPos.subtract(player.getCameraPosVec(0.0F)).normalize();
-        WindChargeEntity windCharge = new WindChargeEntity(player, world, 0, 0, 0);
-        windCharge.setVelocity(direction.x * 2.0, direction.y * 2.0, direction.z * 2.0);
-        windCharge.updatePosition(player.getX(), player.getY() + player.getStandingEyeHeight(), player.getZ());
-        world.spawnEntity(windCharge);
-    }
-
     // spawns particles in a line from start to end positions
     public void spawnParticleLine(ServerWorld world, Vec3d start, Vec3d end, ParticleEffect pfx) {
         Vec3d direction = end.subtract(start).normalize();
@@ -102,14 +92,14 @@ public abstract class BaseWeaponItem extends Item {
         }
     }
 
-    // plays the railgun firing sound at the player's location
-    public void playFireSound(World world, PlayerEntity player) {
+    // plays the weapon's firing sound at the player's location
+    public void playFireSound(World world, PlayerEntity player, String soundID) {
         world.playSound(
                 null,
                 player.getX(),
                 player.getY(),
                 player.getZ(),
-                SoundEvent.of(Identifier.of("qlcraft:rail_fire")),
+                SoundEvent.of(Identifier.of(soundID)),
                 SoundCategory.NEUTRAL,
                 1.0F,
                 1.0F

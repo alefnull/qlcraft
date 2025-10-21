@@ -4,5 +4,14 @@
     "sounds": [
       "qlcraft:rail_fire"
     ]
+  },
+  "rail_hum": {
+    "subtitle": "sound.qlcraft.rail_hum",
+    "sounds": [
+      {
+        "name": "qlcraft:rail_hum",
+        "stream": true
+      }
+    ]
   }
 }
