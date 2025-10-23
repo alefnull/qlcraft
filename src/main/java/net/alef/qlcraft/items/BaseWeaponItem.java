@@ -24,39 +24,41 @@ import java.util.List;
 public abstract class BaseWeaponItem extends Item {
     private static final double PARTICLE_STEP = 0.5;
     private static final double ENTITY_RAYCAST_STEP = 0.25;
-    public boolean INSTAGIB = false; // set to true to enable instagib mode
 
     public BaseWeaponItem(Settings settings) {
         super(settings);
     }
 
-    // called for left-click (primary fire)
-    // must be called manually from packet handler on server side
+    //* called for left-click (primary fire)
+    //* handled on client side for input, but actual firing
+    //* must be called manually from packet handler on server side
     public void firePrimary(PlayerEntity player) {
         if (!player.getEntityWorld().isClient()) {
             if (!player.getItemCooldownManager().isCoolingDown(player.getMainHandStack())) {
-                onPrimaryFire(player, INSTAGIB);
+                onPrimaryFire(player);
             }
         }
     }
 
-    // called for right-click (secondary fire)
+    //* called for right-click (secondary fire)
+    //* built-in method from Item class, seemingly hardwired to right-click
+    //* so left-click is handled manually client-side (see firePrimary above)
     @Override
     public ActionResult use(World world, PlayerEntity player, Hand hand) {
         if (!world.isClient()) {
             if (!player.getItemCooldownManager().isCoolingDown(player.getMainHandStack())) {
-                onSecondaryFire(world, player, hand, INSTAGIB);
+                onSecondaryFire(world, player, hand);
                 return ActionResult.SUCCESS;
             }
         }
         return ActionResult.PASS;
     }
 
-    // abstract methods for subclasses to implement
-    protected abstract void onPrimaryFire(PlayerEntity player, boolean instagib);
-    protected abstract void onSecondaryFire(World world, PlayerEntity player, Hand hand, boolean instagib);
+    //* abstract methods for subclasses to implement
+    protected abstract void onPrimaryFire(PlayerEntity player);
+    protected abstract void onSecondaryFire(World world, PlayerEntity player, Hand hand);
 
-    // raycast for blocks
+    //* raycast for blocks
     public static BlockHitResult raycastBlock(Entity camera, double range, float tickDelta) {
         Vec3d direction = camera.getRotationVec(tickDelta).normalize();
         Vec3d start = camera.getCameraPosVec(tickDelta).add(direction.multiply(1.0));
@@ -64,7 +66,7 @@ public abstract class BaseWeaponItem extends Item {
         return camera.getEntityWorld().raycast(new RaycastContext(start, end, RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, camera));
     }
 
-    // raycast for living entities
+    //* raycast for living entities
     public static EntityHitResult raycastLivingEntity(Entity camera, double range, float tickDelta) {
         Vec3d start = camera.getCameraPosVec(tickDelta);
         Vec3d direction = camera.getRotationVec(tickDelta).normalize();
@@ -81,7 +83,8 @@ public abstract class BaseWeaponItem extends Item {
         return null;
     }
 
-    // spawns particles in a line from start to end positions
+    //* spawns particles in a line from start to end positions
+    //* TO BE RE-WRITTEN USING OWO-LIB PARTICLE API
     public void spawnParticleLine(ServerWorld world, Vec3d start, Vec3d end, ParticleEffect pfx) {
         Vec3d direction = end.subtract(start).normalize();
         double distance = start.distanceTo(end);
@@ -92,7 +95,7 @@ public abstract class BaseWeaponItem extends Item {
         }
     }
 
-    // plays the weapon's firing sound at the player's location
+    //* plays the weapon's firing sound at the player's location
     public void playFireSound(World world, PlayerEntity player, String soundID) {
         world.playSound(
                 null,

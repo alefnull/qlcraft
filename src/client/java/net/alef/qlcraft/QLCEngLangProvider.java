@@ -14,7 +14,9 @@ public class QLCEngLangProvider extends FabricLanguageProvider {
     @Override
     public void generateTranslations(RegistryWrapper.WrapperLookup wrapperLookup, TranslationBuilder translationBuilder) {
         translationBuilder.add("item.qlcraft.railgun", "Railgun");
-        translationBuilder.add("itemGroup.qlcraft", "QLCraft");
+        translationBuilder.add("itemGroup.qlcraft.item_group", "QLCraft");
         translationBuilder.add("sound.qlcraft.rail_fire", "Railgun beam fire");
+        translationBuilder.add("text.config.qlcraft.title", "QLCraft Options");
+        translationBuilder.add("text.config.qlcraft.option.instagibRailgun", "Instagib Railgun");
     }
 }

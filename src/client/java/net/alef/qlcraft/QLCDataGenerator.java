@@ -7,7 +7,8 @@ public class QLCDataGenerator implements DataGeneratorEntrypoint {
 	@Override
 	public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
         FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
+
+        //* English language translations provider
         pack.addProvider(QLCEngLangProvider::new);
-        pack.addProvider(QLCModelProvider::new);
 	}
 }
