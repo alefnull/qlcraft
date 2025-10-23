@@ -1,5 +1,7 @@
 {
   "item.qlcraft.railgun": "Railgun",
-  "itemGroup.qlcraft": "QLCraft",
-  "sound.qlcraft.rail_fire": "Railgun beam fire"
+  "itemGroup.qlcraft.item_group": "QLCraft",
+  "sound.qlcraft.rail_fire": "Railgun beam fire",
+  "text.config.qlcraft.option.instagibRailgun": "Instagib Railgun",
+  "text.config.qlcraft.title": "QLCraft Options"
 }
