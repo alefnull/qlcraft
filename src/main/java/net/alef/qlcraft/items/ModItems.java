@@ -1,41 +1,54 @@
 package net.alef.qlcraft.items;
 
+import io.wispforest.owo.itemgroup.OwoItemSettingsExtension;
+import io.wispforest.owo.registration.reflect.AutoRegistryContainer;
 import net.alef.qlcraft.QLCraft;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 import java.util.function.Function;
 
-public class ModItems {    public static final Item RAILGUN = register("railgun",
-        RailgunItem::new,
-        new Item.Settings().maxCount(1));
+public class ModItems implements AutoRegistryContainer<Item> {
+    public static final Item RAILGUN = register("railgun", RailgunItem::new, new Item.Settings().maxCount(1).group(QLCraft.QLCRAFT_GROUP));
 
-    public static final RegistryKey<ItemGroup> QLCRAFT_GROUP_KEY = RegistryKey.of(Registries.ITEM_GROUP.getKey(), Identifier.of(QLCraft.MOD_ID, "item_group"));
-    public static final ItemGroup QLCRAFT_GROUP = FabricItemGroup.builder()
-            .icon(() -> new ItemStack(RAILGUN))
-            .displayName(Text.translatable("itemGroup.qlcraft"))
-            .build();
-
-    public static Item register(String name, Function<Item.Settings, Item> itemFactory, Item.Settings settings) {
-        RegistryKey<Item> itemKey = RegistryKey.of(RegistryKeys.ITEM, Identifier.of(QLCraft.MOD_ID, name));
-        Item item = itemFactory.apply(settings.registryKey(itemKey));
-        Registry.register(Registries.ITEM, itemKey, item);
-        return item;
+    //* registration helper methods
+    public static <T extends Item> T register(String path, Function<Item.Settings, T> factory) {
+        return register(path, factory, new Item.Settings());
     }
-    public static void registerModItems() {
-        QLCraft.LOGGER.info("Registering QLCraft Items...");
+    public static Item register(String path, Item.Settings settings) {
+        return register(Identifier.of(QLCraft.MOD_ID, path), Item::new, settings);
+    }
+    public static <T extends Item> T register(String path, Function<Item.Settings, T> factory, Item.Settings settings) {
+        return register(Identifier.of(QLCraft.MOD_ID, path), factory, settings);
+    }
+    public static Item register(Identifier identifier, Item.Settings settings) {
+        return register(identifier, Item::new, settings);
+    }
+    public static <T extends Item> T register(Identifier identifier, Function<Item.Settings, T> factory, Item.Settings settings) {
+        var registryKey = RegistryKey.of(RegistryKeys.ITEM, identifier);
 
-        Registry.register(Registries.ITEM_GROUP, QLCRAFT_GROUP_KEY, QLCRAFT_GROUP);
+        settings.registryKey(registryKey);
 
-        ItemGroupEvents.modifyEntriesEvent(QLCRAFT_GROUP_KEY).register(entries -> entries.add(RAILGUN));
+        T t = factory.apply(settings);
+
+        return Registry.register(Registries.ITEM, registryKey, t);
+    }
+
+    //* initialization method to be called from main mod class onInitialize method
+    public static void init() {}
+
+    //* AutoRegistryContainer implementation
+    @Override
+    public Registry<Item> getRegistry() {
+        return Registries.ITEM;
+    }
+
+    @Override
+    public Class<Item> getTargetFieldType() {
+        return Item.class;
     }
 }

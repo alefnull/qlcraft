@@ -1,15 +1,14 @@
 {
 	"schemaVersion": 1,
 	"id": "qlcraft",
+    "name": "QLCraft",
 	"version": "${version}",
-	"name": "qlcraft",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Quake weapons in Minecraft.",
 	"authors": [
-		"Me!"
+		"alefnull"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/alefnull/qlcraft"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/qlcraft/icon.png",
@@ -36,9 +35,9 @@
 		"fabricloader": ">=0.17.3",
 		"minecraft": "~1.21.9",
 		"java": ">=21",
-		"fabric-api": "*"
+		"fabric-api": "*",
+        "owo-lib": ">=0.12.24+1.21.9"
 	},
 	"suggests": {
-		"another-mod": "*"
 	}
 }
